@@ -1,0 +1,127 @@
+
+#include "DFRobot_DF2301Q.h"        //VOICE RECOGNITION MODULE
+#include "Arduino.h"                //BLUETOOTH
+#include <SoftwareSerial.h>         //BLUETOOTH
+#include <LiquidCrystal.h>          //LCD library
+
+
+///////////////////////////////////////////////////////////////////
+/*Ανοίγουμε την εφαρμογή "SERIAL BLUETOOTH TERMINAL" για να μπορέσουμε να στείλουμε μηνύματα.
+  Θα πρέπει να πλησιάζουθμε αρκετά τον αισθητήρα αναγνώρισης φωνής όταν του δίνουμε εντολές.
+  Ο αισθητήρας αναγνώρισης φωνής, για να εκτελέσει τις εντολές που θα του δώσουμε, 
+  θα πρέπει να πούμε την εντολή "HELLO ROBOT". 
+  Για να καλέσει ΒΟΗΘΕΙΑ, θα πρέπει να πούμε την εντολή "HELP" Ή "ΒΟΗΘΕΙΑ".
+  Οταν δώσουμε αυτές τις εντολές τότε ανάβει το LED, βγάζει ήχο το BUZZER, 
+  εμφανίζετγαι στην οθόνη το μήνυμα ¨SOS¨ και γίνεται αποστολή του μηνύματοW "HELP"
+  μέσω BLUETOOTH στην συσκευή που έχουμε συνδέσει μέσω Bluetooth.
+*/
+
+// Create an object
+DFRobot_DF2301Q_I2C asrDF2301Q;           //VOICE RECOGNITION SENSOR
+int confirmation = 0;                     //Αρχικοποίηση μεταβλητής για επιβεβαίωση βοήθειας
+
+
+const byte rxPin = 9;                     //BLUETOOTH
+const byte txPin = 8;                     //BLUETOOTH
+SoftwareSerial BTSerial(rxPin, txPin);    // RX TX BLUETOOTH
+
+String messageBuffer = "";                //BLUETOOTH
+String message = "";                      //BLUETOOTH
+char data = ' ';                          //BLUETOOTH
+
+LiquidCrystal  lcd(12, 11, 5, 4, 3, 2);       /*Initialize the LCD and
+                // RS, E, D4, D5, D6, D7      tell  it which pins is
+                                              to be used for communicating*/
+
+                                              
+const int buzzerPin = 7;                  //BUZZER
+
+// Main program start
+void setup() {
+  Serial.begin(9600);
+
+  //BLUETOOTH
+  // define pin modes for tx, rx:
+  pinMode(rxPin, INPUT);                 
+  pinMode(txPin, OUTPUT);                 
+  BTSerial.begin(9600);    
+
+
+  //VOICE RECOGNITION SENSOR
+  pinMode(2, OUTPUT);                 
+  while (!(asrDF2301Q.begin())) {delay(3000);}  
+  asrDF2301Q.setVolume(7);                      
+  asrDF2301Q.setMuteMode(0);                    
+  asrDF2301Q.setWakeTime(20);                  
+  //Serial.println(asrDF2301Q.getWakeTime());     
+  
+               
+  //LCD MONITOR
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  lcd.print(" HELLO ");
+
+  /*LCD RS pin to digital pin 12
+
+  LCD Enable pin to digital pin 11
+
+  LCD D4 pin to digital pin 5
+
+  LCD D5 pin to digital pin 4
+
+  LCD D6 pin to digital pin 3
+
+  LCD D7 pin to digital pin 2
+
+  LCD R/W pin to ground*/
+
+  pinMode(buzzerPin, OUTPUT);                     //BUZZER
+
+}
+
+
+
+
+void loop() {
+  int asrDF2301Q_CMDID = asrDF2301Q.getCMDID();   
+                    
+  
+  //VOICE RECOGNITION SENSOR
+  if ((not asrDF2301Q_CMDID==0)) {                 
+    if (((asrDF2301Q_CMDID)==5)) {               //learning command word "HELP"
+      
+      //Serial.print("HELP");
+      lcd.print(" SOS ");                        //lcd print
+      digitalWrite(6, HIGH);                     //turn on the light
+      BTSerial.write(" HELP ");                  //BLUETOOTH SEND "HELP"       
+      //Serial.println("HELP");
+
+      digitalWrite(buzzerPin, HIGH);             //BUZZER
+      delay(500);                                //BUZZER
+      digitalWrite(buzzerPin, LOW);              //BUZZER
+      delay(500);                                //BUZZER
+    }
+
+    if (((asrDF2301Q_CMDID)==6)) {               //learning command word "ΒΟΗΘΕΙΑ"
+      
+      //Serial.print("voitheia");                //serial monitor print
+      lcd.print(" SOS ");                        //lcd print
+      digitalWrite(6, HIGH);                     //turn on the light
+      BTSerial.write(" HELP ");                  //BLUETOOTH SEND "HELP"
+      //Serial.println("HELP");
+      
+      digitalWrite(buzzerPin, HIGH);             //BUZZER
+      delay(500);                                //BUZZER
+      digitalWrite(buzzerPin, LOW);              //BUZZER
+      delay(500);                                //BUZZER
+
+    }
+    if (((asrDF2301Q_CMDID)==104)) {             //COMMAND WORD "turn off the light"//
+                          //lcd print
+      digitalWrite(6, LOW);
+    }
+
+      
+  }
+  
+}
