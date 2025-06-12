@@ -52,8 +52,6 @@ Robot Saver
 
 Εδώ: https://www.youtube.com/watch?v=0IGm8gOv9rE  μπορείτε να δείτε βίντεο με τη λειτουργία του μηχανισμού.
 
-Και εδώ: https://github.com/iliana-gian/FutureExperts/tree/main επιπλέον πληροφορίες και φωτογραφικό υλικό.
-
 Τα μέλη της ομάδας μας:
 Χρήστος Μανωλάς,
 Σάμουελ Ντάλλο,
